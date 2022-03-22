@@ -59,13 +59,11 @@ object JScrollPaneExample {
     }
     val textArea = JTextArea(20, 20).apply {
       text = (1..100).joinToString("\n") { "Line $it" }
-      addMouseListener(mouseAdapter)
-      addMouseWheelListener(mouseAdapter)
-      addMouseMotionListener(mouseAdapter)
     }
     val scrollableTextArea = JScrollPane(textArea).apply {
       horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS
       verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_ALWAYS
+      addMouseWheelListener(mouseAdapter)
       verticalScrollBar.addMouseListener(mouseAdapter)
       verticalScrollBar.addMouseMotionListener(mouseAdapter)
     }
