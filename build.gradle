@@ -13,6 +13,11 @@ repositories {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "org.apache.xmlgraphics:batik-all:1.14"
+    implementation "org.apache.xmlgraphics:batik-transcoder:1.14"
+    implementation "org.apache.xmlgraphics:batik-svg-dom:1.14"
+    implementation 'com.lowagie:itext:4.2.2'
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
 }
