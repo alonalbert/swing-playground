@@ -23,7 +23,7 @@ import javax.swing.table.TableColumnModel
  *
  */
 class TableColumnManager(private val table: JTable) :
-  ActionListener, TableColumnModelListener {
+    ActionListener, TableColumnModelListener {
   private val tcm: TableColumnModel get() = table.columnModel
   private val allColumns = tcm.columns.toList().toMutableList()
 
@@ -44,7 +44,7 @@ class TableColumnManager(private val table: JTable) :
    *
    * @param  columnName   the column name of the column to be removed
    */
-  fun hideColumn(columnName: String) {
+  private fun hideColumn(columnName: String) {
     for (i in 0 until tcm.columnCount) {
       val column = tcm.getColumn(i)
       if (columnName == column.headerValue) {
@@ -60,28 +60,13 @@ class TableColumnManager(private val table: JTable) :
    * @param  column  the TableColumn to be removed from the
    * TableColumnModel of the table
    */
-  private fun hideColumn(column: TableColumn?) {
+  private fun hideColumn(column: TableColumn) {
     if (tcm.columnCount == 1) return
 
     //  Ignore changes to the TableColumnModel made by the TableColumnManager
     tcm.removeColumnModelListener(this)
     tcm.removeColumn(column)
     tcm.addColumnModelListener(this)
-  }
-
-  /**
-   * Show a hidden column in the table.
-   *
-   * @param  modelColumn  the column index from the TableModel
-   * of the column to be added
-   */
-  fun showColumn(modelColumn: Int) {
-    for (column in allColumns) {
-      if (column.modelIndex == modelColumn) {
-        showColumn(column)
-        break
-      }
-    }
   }
 
   /**

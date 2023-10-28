@@ -1,10 +1,20 @@
 package table.columns
 
+import table.columns.DynamicColumnTable.ColumnInfo
 import java.awt.BorderLayout
+import java.awt.Insets
 import javax.swing.*
+import javax.swing.JFrame.DISPOSE_ON_CLOSE
 import javax.swing.JFrame.EXIT_ON_CLOSE
 import javax.swing.border.EmptyBorder
 import javax.swing.table.DefaultTableModel
+
+private val config = mutableListOf(
+    ColumnInfo("A", true, 0.5),
+    ColumnInfo("B", true, 0.5),
+    ColumnInfo("C", false, 0.2),
+    ColumnInfo("E", true, 0.2),
+)
 
 class TableColumnManagerDemo : JPanel() {
   init {
@@ -15,15 +25,10 @@ class TableColumnManagerDemo : JPanel() {
   }
 
   private fun createCenterPanel(): JComponent {
-    val table = JTable(DefaultTableModel(15, 15))
-    table.preferredScrollableViewportSize = table.getPreferredSize()
-    TableColumnManager(table)
-    return JScrollPane(table)
+    val table = JTable(DefaultTableModel(2, 5))
+    val dynamicColumnTable = DynamicColumnTable(table, config)
+    return JScrollPane(dynamicColumnTable.component)
   }
-
-  companion object {
-  }
-
 }
 
 fun main() {
@@ -31,10 +36,24 @@ fun main() {
 }
 
 fun createAndShowGUI() {
-  val frame = JFrame("Table Column Manager")
-  frame.setDefaultCloseOperation(EXIT_ON_CLOSE)
-  frame.add(TableColumnManagerDemo())
-  frame.pack()
-  frame.setLocationRelativeTo(null)
-  frame.isVisible = true
+  JFrame("Demo").apply {
+    setDefaultCloseOperation(EXIT_ON_CLOSE)
+    val button = JButton("Click Here").apply {
+      margin = Insets(20, 20, 20, 20)
+    }
+    button.addActionListener {
+      JFrame("Demo").apply {
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE)
+        add(TableColumnManagerDemo())
+        pack()
+        setLocationRelativeTo(null)
+        isVisible = true
+      }
+    }
+    add(button)
+    pack()
+    setSize(400, 400)
+    setLocationRelativeTo(null)
+    isVisible = true
+  }
 }
