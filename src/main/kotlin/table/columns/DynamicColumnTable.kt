@@ -1,8 +1,8 @@
 package table.columns
 
-import java.awt.event.ComponentAdapter
-import java.awt.event.ComponentEvent
-import javax.swing.JTable
+import java.awt.Component
+import java.awt.event.*
+import javax.swing.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ListSelectionEvent
 import javax.swing.event.TableColumnModelEvent
@@ -11,9 +11,10 @@ import javax.swing.event.TableColumnModelListener
 class DynamicColumnTable(private val table: JTable, private val config: MutableList<ColumnInfo>) {
   val component get() = table
   private val tcm get() = table.columnModel
-  private val allColumns = tcm.columns.asSequence().associateBy { it.headerValue }
+  private val allColumns = tcm.columns.asSequence().associateByTo(LinkedHashMap()) { it.headerValue }
   private val configColumns = config.associateBy { it.name }
   private val columnModelListener = ColumnModelListener()
+  private val popupActionListener = PopupActionListener()
   private var initialUpdateDone = false
 
   init {
@@ -40,6 +41,16 @@ class DynamicColumnTable(private val table: JTable, private val config: MutableL
       }
     })
 
+    table.tableHeader.addMouseListener(object : MouseAdapter() {
+      override fun mousePressed(e: MouseEvent) {
+        showColumnSelectionPopup(e)
+      }
+
+      override fun mouseReleased(e: MouseEvent) {
+        showColumnSelectionPopup(e)
+      }
+    })
+
   }
 
 
@@ -57,12 +68,52 @@ class DynamicColumnTable(private val table: JTable, private val config: MutableL
     }
   }
 
+  private fun showColumnSelectionPopup(e: MouseEvent) {
+    if (!e.isPopupTrigger) {
+      return
+    }
+    val header = table.tableHeader
+    val column = header.columnAtPoint(e.getPoint())
+    val headerValue = tcm.getColumn(column).headerValue
+    val columnCount = tcm.columnCount
+    val popup = SelectPopupMenu()
+
+    //  Create a menu item for all columns managed by the table column
+    //  manager, checking to see if the column is shown or hidden.
+    for (tableColumn in allColumns.values) {
+      val value = tableColumn.headerValue
+      val item = JCheckBoxMenuItem(value.toString())
+      item.addActionListener(popupActionListener)
+      try {
+        tcm.getColumnIndex(value)
+        item.setSelected(true)
+        if (columnCount == 1) item.setEnabled(false)
+      } catch (e: IllegalArgumentException) {
+        item.setSelected(false)
+      }
+      popup.add(item)
+      if (value === headerValue) popup.setSelected(item)
+    }
+
+    //  Display the popup below the TableHeader
+    val r = header.getHeaderRect(column)
+    popup.show(header, r.x, r.height)
+  }
+
   private fun withoutColumnModelListener(block: () -> Unit) {
     tcm.removeColumnModelListener(columnModelListener)
     try {
       block()
     } finally {
       tcm.addColumnModelListener(columnModelListener)
+    }
+  }
+
+  private inner class PopupActionListener : ActionListener {
+    override fun actionPerformed(e: ActionEvent) {
+      val button = e.source as AbstractButton
+      configColumns.getValue(e.actionCommand).visible = button.isSelected
+      setupColumns()
     }
   }
 
@@ -103,4 +154,15 @@ class DynamicColumnTable(private val table: JTable, private val config: MutableL
   }
 
   class ColumnInfo(val name: String, var visible: Boolean, var widthRatio: Double)
+
+  private class SelectPopupMenu : JPopupMenu() {
+    override fun setSelected(sel: Component) {
+      val index = getComponentIndex(sel)
+      selectionModel.selectedIndex = index
+      val me = arrayOfNulls<MenuElement>(2)
+      me[0] = this as MenuElement
+      me[1] = getSubElements()[index]
+      SwingUtilities.invokeLater { MenuSelectionManager.defaultManager().setSelectedPath(me) }
+    }
+  }
 }

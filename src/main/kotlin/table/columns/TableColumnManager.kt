@@ -1,11 +1,13 @@
 package table.columns
 
-import java.awt.Component
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import javax.swing.*
+import javax.swing.AbstractButton
+import javax.swing.JCheckBoxMenuItem
+import javax.swing.JPopupMenu
+import javax.swing.JTable
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ListSelectionEvent
 import javax.swing.event.TableColumnModelEvent
@@ -22,6 +24,7 @@ import javax.swing.table.TableColumnModel
  * of the TableColumnModel to hide/show columns as required.
  *
  */
+@Suppress("unused")
 class TableColumnManager(private val table: JTable) :
     ActionListener, TableColumnModelListener {
   private val tcm: TableColumnModel get() = table.columnModel
@@ -122,7 +125,7 @@ class TableColumnManager(private val table: JTable) :
       val column = header.columnAtPoint(e.getPoint())
       val headerValue = tcm.getColumn(column).headerValue
       val columnCount = tcm.columnCount
-      val popup: JPopupMenu = SelectPopupMenu()
+      val popup = JPopupMenu()
 
       //  Create a menu item for all columns managed by the table column
       //  manager, checking to see if the column is shown or hidden.
@@ -194,19 +197,4 @@ class TableColumnManager(private val table: JTable) :
   override fun columnMarginChanged(e: ChangeEvent) {}
   override fun columnRemoved(e: TableColumnModelEvent) {}
   override fun columnSelectionChanged(e: ListSelectionEvent) {}
-
-  /*
-	 *  Allows you to select a specific menu item when the popup is
-	 *  displayed. (i.e. this is a bug? fix)
-	 */
-  internal inner class SelectPopupMenu : JPopupMenu() {
-    override fun setSelected(sel: Component) {
-      val index = getComponentIndex(sel)
-      selectionModel.selectedIndex = index
-      val me = arrayOfNulls<MenuElement>(2)
-      me[0] = this as MenuElement
-      me[1] = getSubElements()[index]
-      SwingUtilities.invokeLater { MenuSelectionManager.defaultManager().setSelectedPath(me) }
-    }
-  }
 }

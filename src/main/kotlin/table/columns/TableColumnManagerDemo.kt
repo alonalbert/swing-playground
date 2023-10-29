@@ -25,8 +25,7 @@ class TableColumnManagerDemo : JPanel() {
   }
 
   private fun createCenterPanel(): JComponent {
-    val table = JTable(DefaultTableModel(2, 5))
-    val dynamicColumnTable = DynamicColumnTable(table, config)
+    val dynamicColumnTable = DynamicColumnTable(JTable(DefaultTableModel(2, 5)), config)
     return JScrollPane(dynamicColumnTable.component)
   }
 }
